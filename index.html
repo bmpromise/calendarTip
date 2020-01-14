@@ -1,12 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>行事萬年曆</title>
+  <link rel="stylesheet" href="./dist/css/style.min.css">
 </head>
+
 <body>
-    
+  <div class="app" v-cloak>
+    <div class="header">
+      <div>
+        <h1>
+          {{calendarDate.year}} 年 {{calendarDate.month+1}} 月
+          <img src="https://img.icons8.com/ios/24/0/year-of-dog.png">
+        </h1>
+      </div>
+      <div class="arrowPerf" @click="adjustMonth(-1)">
+      </div>
+      <div class="arrowNext" @click="adjustMonth(1)">
+      </div>
+    </div>
+    <div class="calendar">
+      <div class="weekDay">
+        <div v-for="item in weekAry">{{ item }}</div>
+      </div>
+      <div class="week" v-for="item in getCalendarDayFisrt" :data-date="item.date" @click="tickFn(item.date)" :class="{
+            today:item.isToday,
+            other:!item.isThisMonth
+          }">
+        <div class="todoEvent"></div>
+        <div class="schedule"></div>
+      </div>
+    </div>
+  </div>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.6.10/vue.js'></script>
+  <script>
+    var vm = new Vue({
+      el: ".app",
+      data: {
+        weekAry: ['日', '一', '二', '三', '四', '五', '六'],
+        today: {
+          year: 0,
+          month: 0,
+          date: 0,
+          day: 0
+        },
+        calendarDate: {
+          year: 0,
+          month: 0,
+          date: 0,
+          day: 0
+        }
+      },
+      mounted() {
+        this.setToday()
+      },
+      computed: {
+        getCalendarDayFisrt() {
+          let startCalendarDate = new Date(this.calendarDate.year, this.calendarDate.month, 1) // this calendar 1st date
+          let endCalendarDate = new Date(this.calendarDate.year, this.calendarDate.month + 1, 0) // this calendar last date
+          endCalendarDate = new Date(endCalendarDate.getFullYear(), endCalendarDate.getMonth(), endCalendarDate.getDate() + (6 - endCalendarDate.getDay()))
+          startCalendarDate = new Date(this.calendarDate.year, this.calendarDate.month, 0 - startCalendarDate.getDay())
+          let ary = []
+          let i = 0
+          while (true) {
+            startCalendarDate.setDate(startCalendarDate.getDate() + 1)
+            ary.push({
+              date: startCalendarDate.getDate(),
+              isThisMonth: (
+                this.calendarDate.month === startCalendarDate.getMonth()
+              ) ? true : false,
+              isToday: (
+                this.today.year === startCalendarDate.getFullYear()&&
+                this.today.month === startCalendarDate.getMonth()&&
+                this.today.date === startCalendarDate.getDate()
+              ) ? true : false,
+              key: i++
+            })
+            if (startCalendarDate.getTime() >= endCalendarDate.getTime()) break
+          }
+          return ary
+        }
+      },
+      methods: {
+        setToday() {
+          const date = new Date()
+          this.today.year = this.calendarDate.year = date.getFullYear()
+          this.today.month = this.calendarDate.month = date.getMonth()
+          this.today.date = this.calendarDate.date = date.getDate()
+          this.today.day = this.calendarDate.day = date.getDay()
+        },
+        adjustYear(fix) {
+          this.calendarDate.year += fix
+        },
+        adjustMonth(fix) {
+          let month = this.calendarDate.month + fix
+          if (month > 11) {
+            this.adjustYear(1)
+            this.calendarDate.month = 0
+          } else if (month < 0) {
+            this.adjustYear(-1)
+            this.calendarDate.month = 11
+          } else {
+            this.calendarDate.month = month
+          }
+        },
+        tickFn(e) {
+          console.log(e)
+        }
+      }
+    });
+  </script>
 </body>
+
 </html>
